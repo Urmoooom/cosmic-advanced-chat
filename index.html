@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmic Advanced Chat - Multi-Device Messaging</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Authentication Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-icon">✦</div>
+        <h2>Cosmic Chat</h2>
+        <p>Advanced Multi-Device Messaging</p>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" data-tab="login">Login</button>
+        <button class="auth-tab-btn" data-tab="register">Register</button>
+      </div>
+
+      <form class="auth-form" id="login-form" data-tab="login">
+        <input type="text" id="login-username" placeholder="Username" maxlength="20" required autocomplete="off">
+        <input type="password" id="login-password" placeholder="Password" maxlength="50" required autocomplete="off">
+        <button type="submit">Sign In</button>
+        <p class="form-hint">Incorrect credentials will create a new account</p>
+      </form>
+
+      <form class="auth-form hidden" id="register-form" data-tab="register">
+        <input type="text" id="register-username" placeholder="Choose Username" maxlength="20" required autocomplete="off">
+        <input type="password" id="register-password" placeholder="Create Password" maxlength="50" required autocomplete="off">
+        <input type="password" id="register-confirm" placeholder="Confirm Password" maxlength="50" required autocomplete="off">
+        <button type="submit">Create Account</button>
+        <p class="form-hint">Passwords are securely hashed and stored locally</p>
+      </form>
+
+      <div class="auth-footer">
+        <small>Built with WebRTC • No server required • End-to-end encrypted</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay hidden" id="settings-modal">
+    <div class="settings-card">
+      <div class="settings-header">
+        <h2>Settings & Preferences</h2>
+        <button class="close-btn" onclick="closeSettingsModal()">✕</button>
+      </div>
+
+      <div class="settings-tabs">
+        <button class="settings-tab-btn active" data-tab="account">Account</button>
+        <button class="settings-tab-btn" data-tab="appearance">Appearance</button>
+        <button class="settings-tab-btn" data-tab="privacy">Privacy</button>
+        <button class="settings-tab-btn" data-tab="about">About</button>
+      </div>
+
+      <!-- Account Tab -->
+      <div class="settings-tab-content active" data-tab="account">
+        <div class="setting-item">
+          <label>Current User</label>
+          <p id="settings-username" class="setting-value">-</p>
+        </div>
+        <div class="setting-item">
+          <label>Account Status</label>
+          <p class="setting-value">Authenticated & Verified</p>
+        </div>
+        <div class="setting-item">
+          <label>User ID</label>
+          <p id="settings-userid" class="setting-value">-</p>
+        </div>
+        <button class="btn btn-danger" onclick="logout()">Logout & Exit</button>
+      </div>
+
+      <!-- Appearance Tab -->
+      <div class="settings-tab-content hidden" data-tab="appearance">
+        <div class="setting-item">
+          <label>Theme</label>
+          <div class="theme-selector">
+            <button class="theme-btn active" data-theme="dark" onclick="setTheme('dark')">
+              <i class="fas fa-moon"></i> Dark
+            </button>
+            <button class="theme-btn" data-theme="light" onclick="setTheme('light')">
+              <i class="fas fa-sun"></i> Light
+            </button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="compact-mode" onchange="toggleCompactMode(this.checked)">
+            Compact Message View
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="animations-enabled" checked onchange="toggleAnimations(this.checked)">
+            Enable Animations
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>Font Size</label>
+          <select id="font-size" onchange="setFontSize(this.value)">
+            <option value="small">Small</option>
+            <option value="normal" selected>Normal</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Privacy Tab -->
+      <div class="settings-tab-content hidden" data-tab="privacy">
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="online-status" checked onchange="toggleOnlineStatus(this.checked)">
+            Show Online Status
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" id="typing-indicator" checked>
+            Show Typing Indicator
+          </label>
+        </div>
+        <div class="setting-item">
+          <label>Message History Retention</label>
+          <select id="history-retention">
+            <option value="7">7 days</option>
+            <option value="30" selected>30 days</option>
+            <option value="90">90 days</option>
+            <option value="all">All messages</option>
+          </select>
+        </div>
+        <button class="btn btn-warning" onclick="clearMessageHistory()">Clear All Messages</button>
+      </div>
+
+      <!-- About Tab -->
+      <div class="settings-tab-content hidden" data-tab="about">
+        <div class="about-info">
+          <h3>Cosmic Advanced Chat v2.0</h3>
+          <p>A fully-featured multi-device chat application with:</p>
+          <ul>
+            <li>✓ End-to-end message encryption</li>
+            <li>✓ WebRTC voice communication</li>
+            <li>✓ Cross-device synchronization</li>
+            <li>✓ Rich message formatting</li>
+            <li>✓ User presence detection</li>
+            <li>✓ Advanced search capabilities</li>
+            <li>✓ Message reactions & threading</li>
+            <li>✓ File sharing (up to 3MB)</li>
+          </ul>
+          <p style="margin-top: 20px; font-size: 12px; color: var(--text-muted);">
+            Built with HTML5, CSS3, and vanilla JavaScript<br>
+            Uses localStorage and IndexedDB for persistence<br>
+            WebRTC for peer-to-peer communication
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal-overlay hidden" id="profile-modal">
+    <div class="profile-card">
+      <button class="close-btn" onclick="closeProfileModal()">✕</button>
+      <div class="profile-avatar-large" id="profile-avatar">?</div>
+      <h2 id="profile-username">-</h2>
+      <p id="profile-status" class="profile-status">Online</p>
+      
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-value" id="profile-messages">0</span>
+          <span class="stat-label">Messages</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="profile-friends">0</span>
+          <span class="stat-label">Conversations</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="profile-joined">-</span>
+          <span class="stat-label">Joined</span>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn" onclick="addFriendFromProfile()">
+          <i class="fas fa-user-plus"></i> Add Friend
+        </button>
+        <button class="btn btn-secondary" onclick="viewUserMessages()">
+          <i class="fas fa-envelope"></i> Message
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Channel Modal -->
+  <div class="modal-overlay hidden" id="create-channel-modal">
+    <div class="modal-card">
+      <h2>Create New Channel</h2>
+      <form id="create-channel-form">
+        <input type="text" id="channel-name" placeholder="Channel name" maxlength="30" required>
+        <textarea id="channel-description" placeholder="Channel description (optional)" maxlength="200"></textarea>
+        <div class="form-group">
+          <label>Channel Type</label>
+          <select id="channel-type">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn">Create</button>
+          <button type="button" class="btn btn-secondary" onclick="closeCreateChannelModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="server-header">
+          <div class="server-icon">✦</div>
+          <div class="server-title">Cosmic Chat</div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button class="quick-action-btn" title="New Channel" onclick="openCreateChannelModal()">
+            <i class="fas fa-plus"></i>
+          </button>
+          <button class="quick-action-btn" title="Search" onclick="toggleSearchModal()">
+            <i class="fas fa-search"></i>
+          </button>
+          <button class="quick-action-btn" title="Settings" onclick="openSettingsModal()">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="channels-section">
+        <!-- Text Channels -->
+        <div class="category-header">
+          <span class="category-title">
+            <i class="fas fa-hashtag"></i> Text Channels
+          </span>
+          <button class="add-channel-btn" title="Add channel" onclick="openCreateChannelModal()">+</button>
+        </div>
+        <div class="channels-list" id="text-channels-list">
+          <button class="channel-btn active" id="btn-general" data-channel="general" onclick="switchChannel('general')">
+            <i class="fas fa-hashtag"></i> general
+          </button>
+          <button class="channel-btn" id="btn-announcements" data-channel="announcements" onclick="switchChannel('announcements')">
+            <i class="fas fa-bullhorn"></i> announcements
+          </button>
+          <button class="channel-btn" id="btn-random" data-channel="random" onclick="switchChannel('random')">
+            <i class="fas fa-random"></i> random
+          </button>
+        </div>
+
+        <!-- Voice Channels -->
+        <div class="category-header">
+          <span class="category-title">
+            <i class="fas fa-microphone"></i> Voice Channels
+          </span>
+        </div>
+        <div class="voice-channels-list" id="voice-channels-list">
+          <button class="voice-channel-btn" id="btn-vc-main" data-channel="main-voice" onclick="toggleVoiceChannel('main-voice')">
+            <i class="fas fa-headphones"></i> Main Voice
+            <span class="voice-user-count" id="vc-main-count">0</span>
+          </button>
+        </div>
+        <div class="vc-users-list" id="vc-users-container"></div>
+
+        <!-- Direct Messages -->
+        <div class="category-header">
+          <span class="category-title">
+            <i class="fas fa-envelope"></i> Direct Messages
+          </span>
+          <button class="add-channel-btn" title="New DM" onclick="promptNewDM()">+</button>
+        </div>
+        <div class="dm-list" id="dm-list"></div>
+      </div>
+
+      <!-- Voice Control Bar -->
+      <div class="voice-control-bar hidden" id="voice-bar">
+        <div class="voice-info">
+          <i class="fas fa-microphone-slash" id="voice-mute-icon"></i>
+          <div>
+            <div class="voice-status">In Voice Channel</div>
+            <div class="voice-channel-name" id="voice-channel-label">-</div>
+          </div>
+        </div>
+        <div class="voice-actions">
+          <button class="voice-action-btn" id="voice-mute-btn" onclick="toggleMute()" title="Toggle Mute">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button class="voice-action-btn danger" onclick="leaveVoiceChannel()" title="Leave Channel">
+            <i class="fas fa-phone-slash"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- User Profile Bar -->
+      <div class="user-profile-bar">
+        <div class="user-info">
+          <div class="user-avatar" id="sidebar-avatar">?</div>
+          <div class="user-details">
+            <div class="user-name" id="sidebar-username">Anonymous</div>
+            <div class="user-status" id="sidebar-status">Offline</div>
+          </div>
+        </div>
+        <button class="profile-btn" onclick="openSettingsModal()" title="Settings">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-area">
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div class="channel-info">
+          <i class="fas fa-hashtag" id="channel-icon"></i>
+          <div class="channel-header-text">
+            <h2 id="channel-title">general</h2>
+            <p id="channel-description" class="channel-desc">-</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="connection-status">
+            <span class="status-dot" id="connection-dot"></span>
+            <span id="connection-text">Connecting</span>
+          </div>
+          <button class="header-btn" title="Members" onclick="toggleMembersList()">
+            <i class="fas fa-users"></i>
+            <span id="member-count">0</span>
+          </button>
+          <button class="header-btn" title="Channel Info" onclick="showChannelInfo()">
+            <i class="fas fa-info-circle"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Messages Container -->
+      <div class="messages-wrapper">
+        <div class="messages-container" id="messages-container">
+          <div class="welcome-message">
+            <div class="welcome-icon">✦</div>
+            <h3>Welcome to <span id="welcome-channel">general</span></h3>
+            <p>This is the beginning of the channel. Start the conversation!</p>
+          </div>
+        </div>
+
+        <!-- Typing Indicators -->
+        <div class="typing-indicators" id="typing-indicators"></div>
+      </div>
+
+      <!-- Message Input Area -->
+      <div class="input-area">
+        <div class="message-actions">
+          <button class="action-btn" id="file-upload-btn" title="Upload File">
+            <i class="fas fa-paperclip"></i>
+          </button>
+          <input type="file" id="file-input" style="display:none;">
+          <button class="action-btn" title="Emoji" onclick="toggleEmojiPicker()">
+            <i class="fas fa-smile"></i>
+          </button>
+        </div>
+
+        <form class="chat-form" id="chat-form">
+          <div class="message-input-wrapper">
+            <input 
+              type="text" 
+              id="message-input" 
+              placeholder="Message #general" 
+              autocomplete="off"
+              maxlength="2000"
+            >
+            <div class="char-counter">
+              <span id="char-count">0</span>/2000
+            </div>
+          </div>
+          <button type="submit" class="send-btn" title="Send Message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+
+        <!-- Emoji Picker -->
+        <div class="emoji-picker hidden" id="emoji-picker">
+          <div class="emoji-grid" id="emoji-grid"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Members Sidebar -->
+    <aside class="members-sidebar hidden" id="members-sidebar">
+      <div class="members-header">
+        <h3>Members</h3>
+        <button class="close-btn" onclick="toggleMembersList()">✕</button>
+      </div>
+      <div class="members-list" id="members-list">
+        <div class="member-item">
+          <div class="member-avatar">?</div>
+          <div class="member-info">
+            <div class="member-name">Loading...</div>
+            <div class="member-status">offline</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Audio Container for Voice Calls -->
+  <div id="audio-container" style="display:none;"></div>
+
+  <!-- Loading Indicator -->
+  <div class="loading-indicator hidden" id="loading-indicator">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="notification-container" id="notification-container"></div>
+
+  <!-- Search Modal -->
+  <div class="modal-overlay hidden" id="search-modal">
+    <div class="search-card">
+      <div class="search-header">
+        <h2>Search Messages</h2>
+        <button class="close-btn" onclick="toggleSearchModal()">✕</button>
+      </div>
+      <input type="text" id="search-input" placeholder="Search messages, users..." autofocus>
+      <div class="search-results" id="search-results"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/database.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/messaging.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
